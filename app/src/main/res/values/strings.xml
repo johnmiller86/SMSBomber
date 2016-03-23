@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">SMS Bomber</string>
+    <string name="select_contact">Select Contact</string>
+    <string name="how_many_bombs">How many bombs?</string>
+    <string name="send_text">Send Text</string>
+    <string name="enter_message">Enter message</string>
+</resources>
