@@ -1,4 +1,4 @@
-package com.jdm5908_bw.ist402.smsbomber;
+package com.jdm5908_bw.ist402.sms_bomber;
 
 import org.junit.Test;
 

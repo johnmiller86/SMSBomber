@@ -1,7 +1,6 @@
-package com.jdm5908_bw.ist402.smsbomber;
+package com.jdm5908_bw.ist402.sms_bomber;
 
 // Imports
-
 import android.Manifest;
 import android.content.ContentUris;
 import android.content.DialogInterface;
@@ -20,7 +19,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -43,7 +41,6 @@ public class BombActivity extends AppCompatActivity {
     private TextView targetNameTextView;
     private EditText messageEditText, quantityEditText;
     private ImageView targetImageView;
-    private Button selectTargetButton, launchButton;
 
     // Instance Variables
     private Uri contact;
@@ -60,8 +57,6 @@ public class BombActivity extends AppCompatActivity {
         quantityEditText = (EditText) findViewById(R.id.quantityEditText);
         targetImageView = (ImageView) findViewById(R.id.imageView);
         targetNameTextView = (TextView) findViewById(R.id.textView);
-        launchButton = (Button) findViewById(R.id.sendTextButton);
-        selectTargetButton = (Button) findViewById(R.id.selectContactButton);
         smsManager = SmsManager.getDefault();
     }
 
@@ -69,6 +64,7 @@ public class BombActivity extends AppCompatActivity {
      * Click Listener for the Select Contact Button.
      * @param view the select button.
      */
+    @SuppressWarnings("unused")
     public void pickContact(View view){
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
     }
@@ -77,128 +73,17 @@ public class BombActivity extends AppCompatActivity {
      * Click Listener for the Send Text Button.
      * @param view the send button.
      */
+    @SuppressWarnings("unused")
     public void sendText(View view){
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST_SEND_SMS);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_PERMISSION && resultCode == RESULT_OK){
-            contact = data.getData();
-            retrieveContactName();
-            retrieveContactNumber();
-            retrieveContactPhoto();
-        }
-    }
-
     /**
-     * Gets and Sets the Contact's Picture if Available.
+     * Handles operations based on permission results.
+     * @param requestCode the request code.
+     * @param permissions the result code.
+     * @param grantResults the grant results array.
      */
-    private void retrieveContactPhoto() {
-
-        try {
-            InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(getContentResolver(),
-                    ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, Long.valueOf(contactId)));
-
-            if (inputStream != null){
-                Bitmap photo = BitmapFactory.decodeStream(inputStream);
-                targetImageView.setImageBitmap(photo);
-                inputStream.close();
-            }else{
-                targetImageView.setImageResource(R.mipmap.ic_launcher);
-            }
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Gets the Contact's Number.
-     */
-    private void retrieveContactNumber() {
-
-        contactNumber = null;
-
-        // Querying Contact ID
-        Cursor cursor = getContentResolver().query(contact, new String[]{ContactsContract.Contacts._ID}, null, null, null);
-
-        if (cursor != null && cursor.moveToFirst()){
-            contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-            cursor.close();
-        }
-
-        // Retrieving Mobile Number
-        cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER},
-                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ? AND " +
-                        ContactsContract.CommonDataKinds.Phone.TYPE + " = " +
-                        ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE,
-                new String[]{contactId}, null);
-
-        // Storing Contacts Number
-        if (cursor != null && cursor.moveToFirst()){
-            contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-            cursor.close();
-        }
-    }
-
-    /**
-     * Gets the Contact's Name.
-     */
-    private void retrieveContactName() {
-
-        Cursor cursor = getContentResolver().query(contact, null, null, null, null);
-
-        if (cursor != null && cursor.moveToFirst()){
-            targetNameTextView.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
-            cursor.close();
-        }
-    }
-
-    /**
-     * Deploys messages.
-     */
-    private void sendBombs(){
-        // Contact not selected
-        if (contact == null || contact.toString().equals("")){
-            Toast.makeText(this, "You must select a target!!", Toast.LENGTH_SHORT).show();
-        }
-        // Contact selected has no number
-        else if (contactNumber == null || contactNumber.equals("")){
-            Toast.makeText(this, "Target has no associated mobile number!!", Toast.LENGTH_SHORT).show();
-        }
-        // Amount empty
-        else if (quantityEditText.getText().toString().equals("")){
-            Toast.makeText(this, "An amount was not specified!!", Toast.LENGTH_SHORT).show();
-        }
-        // Message empty
-        else if (messageEditText.getText().toString().equals("")){
-            Toast.makeText(this, "A message was not specified!!", Toast.LENGTH_SHORT).show();
-        }
-        // Send
-        else{
-            int bombs = Integer.parseInt(quantityEditText.getText().toString());
-            try {
-                for (int i = 0; i < bombs; i++) {
-                    smsManager.sendTextMessage(contactNumber, null, messageEditText.getText().toString(), null, null);
-                }
-                Toast.makeText(this, "Bombs Deployed!!", Toast.LENGTH_SHORT).show();
-                finish();
-            } catch (IllegalArgumentException e) {
-                Toast.makeText(this, "Launch Failed!!", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    /**
-     * Opens the app's settings page in AppManager.
-     */
-    private void goToSettings(){
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        Uri uri = Uri.fromParts("package", getPackageName(), null);
-        intent.setData(uri);
-        startActivityForResult(intent, REQUEST_PERMISSION);
-    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults){
         switch (requestCode){
@@ -304,5 +189,130 @@ public class BombActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    /**
+     * Performs operations upon successful target selection.
+     * @param requestCode the request code.
+     * @param resultCode the result code.
+     * @param data the data returned from the Intent.
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_PERMISSION && resultCode == RESULT_OK){
+            contact = data.getData();
+            retrieveContactName();
+            retrieveContactNumber();
+            retrieveContactPhoto();
+        }
+    }
+
+    /**
+     * Gets the Contact's Name.
+     */
+    private void retrieveContactName() {
+
+        Cursor cursor = getContentResolver().query(contact, null, null, null, null);
+
+        if (cursor != null && cursor.moveToFirst()){
+            targetNameTextView.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
+            cursor.close();
+        }
+    }
+
+    /**
+     * Gets the Contact's Number.
+     */
+    private void retrieveContactNumber() {
+
+        contactNumber = null;
+
+        // Querying Contact ID
+        Cursor cursor = getContentResolver().query(contact, new String[]{ContactsContract.Contacts._ID}, null, null, null);
+
+        if (cursor != null && cursor.moveToFirst()){
+            contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+            cursor.close();
+        }
+
+        // Retrieving Mobile Number
+        cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER},
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ? AND " +
+                        ContactsContract.CommonDataKinds.Phone.TYPE + " = " +
+                        ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE,
+                new String[]{contactId}, null);
+
+        // Storing Mobile Number
+        if (cursor != null && cursor.moveToFirst()){
+            contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+            cursor.close();
+        }
+    }
+
+    /**
+     * Gets and Sets the Contact's Picture if Available.
+     */
+    private void retrieveContactPhoto() {
+
+        try {
+            InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(getContentResolver(),
+                    ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, Long.valueOf(contactId)));
+
+            if (inputStream != null){
+                Bitmap photo = BitmapFactory.decodeStream(inputStream);
+                targetImageView.setImageBitmap(photo);
+                inputStream.close();
+            }else{
+                targetImageView.setImageResource(R.mipmap.ic_launcher);
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Deploys messages.
+     */
+    private void sendBombs(){
+        // Contact not selected
+        if (contact == null || contact.toString().equals("")){
+            Toast.makeText(this, "You must select a target!!", Toast.LENGTH_SHORT).show();
+        }
+        // Contact selected has no number
+        else if (contactNumber == null || contactNumber.equals("")){
+            Toast.makeText(this, "Target has no associated mobile number!!", Toast.LENGTH_SHORT).show();
+        }
+        // Amount empty
+        else if (quantityEditText.getText().toString().equals("")){
+            Toast.makeText(this, "An amount was not specified!!", Toast.LENGTH_SHORT).show();
+        }
+        // Message empty
+        else if (messageEditText.getText().toString().equals("")){
+            Toast.makeText(this, "A message was not specified!!", Toast.LENGTH_SHORT).show();
+        }
+        // Send
+        else{
+            int bombs = Integer.parseInt(quantityEditText.getText().toString());
+            try {
+                for (int i = 0; i < bombs; i++) {
+                    smsManager.sendTextMessage(contactNumber, null, messageEditText.getText().toString(), null, null);
+                }
+                Toast.makeText(this, "Bombs Deployed!!", Toast.LENGTH_SHORT).show();
+                finish();
+            } catch (IllegalArgumentException e) {
+                Toast.makeText(this, "Launch Failed!!", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * Opens the app's settings page in AppManager.
+     */
+    private void goToSettings(){
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivityForResult(intent, REQUEST_PERMISSION);
     }
 }
