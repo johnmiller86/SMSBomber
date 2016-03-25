@@ -161,13 +161,17 @@ public class BombActivity extends AppCompatActivity {
      * Deploys messages.
      */
     private void sendBombs(){
-        if (contactNumber != null && !contactNumber.equals("")) {
-            int bombs = 0;
-            try {
-                bombs = Integer.parseInt(quantityEditText.getText().toString());
-            }catch (NumberFormatException e){
-                Toast.makeText(this, "An amount was not specified!!", Toast.LENGTH_SHORT).show();
-            }
+        if (contactNumber == null || contactNumber.equals("")){
+            Toast.makeText(this, "You must select a target!!", Toast.LENGTH_SHORT).show();
+        }
+        else if (quantityEditText.getText().toString() == null || quantityEditText.getText().toString().equals("")){
+            Toast.makeText(this, "An amount was not specified!!", Toast.LENGTH_SHORT).show();
+        }
+        else if (messageEditText.getText().toString() == null || messageEditText.getText().toString().equals("")){
+            Toast.makeText(this, "A message was not specified!!", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            int bombs = Integer.parseInt(quantityEditText.getText().toString());
             try {
                 for (int i = 0; i < bombs; i++) {
                     smsManager.sendTextMessage(contactNumber, null, messageEditText.getText().toString(), null, null);
