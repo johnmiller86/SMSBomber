@@ -11,11 +11,14 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,18 +33,20 @@ import java.io.InputStream;
 public class BombActivity extends AppCompatActivity {
 
     // ID Constants
-    private static final int ACTION_PICK_RESULT = 1;
+    private static final int REQUEST_PERMISSION = 1;
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 2;
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 3;
 
     // UI Components
-    private TextView contactNameTextView;
+    private TextView targetNameTextView;
     private EditText messageEditText, quantityEditText;
-    private ImageView imageView;
+    private ImageView targetImageView;
+    private Button selectTargetButton, launchButton;
 
     // Instance Variables
     private Uri contact;
     private String contactId, contactNumber;
+    private SmsManager smsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +56,11 @@ public class BombActivity extends AppCompatActivity {
         // Initializing UI Components
         messageEditText = (EditText) findViewById(R.id.messageEditText);
         quantityEditText = (EditText) findViewById(R.id.quantityEditText);
-        imageView = (ImageView) findViewById(R.id.imageView);
-        contactNameTextView = (TextView) findViewById(R.id.textView);
+        targetImageView = (ImageView) findViewById(R.id.imageView);
+        targetNameTextView = (TextView) findViewById(R.id.textView);
+        launchButton = (Button) findViewById(R.id.sendTextButton);
+        selectTargetButton = (Button) findViewById(R.id.selectContactButton);
+        smsManager = SmsManager.getDefault();
     }
 
     /**
@@ -61,33 +69,22 @@ public class BombActivity extends AppCompatActivity {
      */
     public void pickContact(View view){
 
-        // If OS == Marshmallow
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
+        // Marshmallow Runtime Permissions
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED){
 
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.READ_CONTACTS)) {
-
-                // Show an expanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-
-                // No explanation needed, we can request the permission.
-
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_CONTACTS},
-                        MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
+//            // Should we show an explanation?
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)){
+//
+//                // Show an expanation to the user *asynchronously* -- don't block
+//                // this thread waiting for the user's response! After the user
+//                // sees the explanation, try again to request the permission.
+//
+//                //TODO ASYNC EXPLANATION DIALOG
+//
+//            }else{
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, MY_PERMISSIONS_REQUEST_READ_CONTACTS); // Request Permissions
+//            }
         }
-        startActivityForResult(new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI), ACTION_PICK_RESULT);
     }
 
     /**
@@ -95,50 +92,25 @@ public class BombActivity extends AppCompatActivity {
      * @param view the send button.
      */
     public void sendText(View view){
-        SmsManager smsManager = SmsManager.getDefault();
 
-        // If OS == Marshmallow
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.SEND_SMS)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED){
 
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.SEND_SMS)) {
-
-                // Show an expanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-
-                // No explanation needed, we can request the permission.
-
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.SEND_SMS},
-                        MY_PERMISSIONS_REQUEST_SEND_SMS);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        }
-        if (contactNumber != null) {
-            int bombs = Integer.parseInt(quantityEditText.getText().toString());
-            try {
-                for (int i = 0; i < bombs; i++){
-                    smsManager.sendTextMessage(contactNumber, null, messageEditText.getText().toString(), null, null);
-                    Toast.makeText(this, "Sending Bombs!", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-            } catch (IllegalArgumentException e) {
-                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+//            // Should we show an explanation?
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.SEND_SMS)){
+//
+//                // Show an expanation to the user *asynchronously* -- don't block
+//                // this thread waiting for the user's response! After the user
+//                // sees the explanation, try again to request the permission.
+//                //TODO ASYNC EXPLANATION DIALOG
+//
+//            }else{
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST_SEND_SMS); // Request Permissions
+//            }
         }
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == ACTION_PICK_RESULT && resultCode == RESULT_OK){
+        if (requestCode == REQUEST_PERMISSION && resultCode == RESULT_OK){
             contact = data.getData();
             retrieveContactName();
             retrieveContactNumber();
@@ -153,19 +125,17 @@ public class BombActivity extends AppCompatActivity {
 
         try {
             InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(getContentResolver(),
-                    ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(contactId)));
+                    ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, Long.valueOf(contactId)));
 
             if (inputStream != null){
                 Bitmap photo = BitmapFactory.decodeStream(inputStream);
                 ImageView imageView = (ImageView) findViewById(R.id.imageView);
                 imageView.setImageBitmap(photo);
                 inputStream.close();
+            }else{
+                targetImageView.setImageResource(R.mipmap.ic_launcher);
             }
-            else{
-                //TODO use non-deprecated method.
-                imageView.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
-            }
-        } catch (IOException e) {
+        }catch (IOException e){
             e.printStackTrace();
         }
     }
@@ -178,12 +148,9 @@ public class BombActivity extends AppCompatActivity {
         contactNumber = null;
 
         // Querying Contact ID
-        Cursor cursor = getContentResolver().query(contact,
-                new String[]{ContactsContract.Contacts._ID},
-                null, null, null);
+        Cursor cursor = getContentResolver().query(contact, new String[]{ContactsContract.Contacts._ID}, null, null, null);
 
-        if (cursor.moveToFirst()) {
-
+        if (cursor.moveToFirst()){
             contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
         }
         cursor.close();
@@ -191,22 +158,19 @@ public class BombActivity extends AppCompatActivity {
         // Retrieving Number(s)
         cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                 new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER},
-
                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ? AND " +
                         ContactsContract.CommonDataKinds.Phone.TYPE + " = " +
                         ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE,
-
-                new String[]{contactId},
-                null);
+                new String[]{contactId}, null);
 
         // Storing Contacts Number
-        if (cursor.moveToFirst()) {
+        if (cursor.moveToFirst()){
             contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
         }
         cursor.close();
 
         // Contact Doesn't Contain Number
-        if (contactNumber == null) {
+        if (contactNumber == null){
             Toast.makeText(this, "This contact does not have a number!", Toast.LENGTH_SHORT).show();
         }
     }
@@ -218,11 +182,79 @@ public class BombActivity extends AppCompatActivity {
 
         Cursor cursor = getContentResolver().query(contact, null, null, null, null);
 
-        if (cursor.moveToFirst()) {
-
-            contactNameTextView.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
+        if (cursor.moveToFirst()){
+            targetNameTextView.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
         }
-
         cursor.close();
+    }
+
+    /**
+     * Deploys messages.
+     */
+    private void sendBombs(){
+        if (contactNumber != null && !contactNumber.equals("")) {
+            int bombs = 0;
+            try {
+                bombs = Integer.parseInt(quantityEditText.getText().toString());
+            }catch (NumberFormatException e){
+                Toast.makeText(this, "An amount was not specified!!", Toast.LENGTH_SHORT).show();
+            }
+            try {
+                for (int i = 0; i < bombs; i++) {
+                    smsManager.sendTextMessage(contactNumber, null, messageEditText.getText().toString(), null, null);
+                }
+                Toast.makeText(this, "Bombs Deployed!!", Toast.LENGTH_SHORT).show();
+                finish();
+            } catch (IllegalArgumentException e) {
+                Toast.makeText(this, "Launch Failed!!", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void goToSettings(){
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivityForResult(intent, REQUEST_PERMISSION);
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults){
+        switch (requestCode){
+            case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+                // Granted
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    startActivityForResult(new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI), REQUEST_PERMISSION);
+                }
+                // Blocked
+                else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)){
+                    // TODO Show Dialog Explanation
+                    goToSettings();
+                }
+                // Denied
+                else{
+                    selectTargetButton.setEnabled(false);
+                    // TODO Show Dialog Explanation
+                    // TODO Re-request Permission
+                }
+                return;
+            }
+            case MY_PERMISSIONS_REQUEST_SEND_SMS:{
+                // Granted
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    sendBombs();
+                }
+                // Blocked
+                else if(!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.SEND_SMS)){
+                    // TODO Show Dialog Explanation
+                    goToSettings();
+                }
+                // Denied
+                else {
+                    launchButton.setEnabled(false);
+                    // TODO Show Dialog Explanation
+                    // TODO Re-request Permission
+                }
+            }
+        }
     }
 }
