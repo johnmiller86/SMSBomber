@@ -65,6 +65,7 @@
         android:layout_below="@+id/selectContactButton"
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:inputType="textCapSentences|textMultiLine"
+        android:maxLength="160"
         android:hint="@string/enter_message"
         android:gravity="top"
         android:background="@color/colorWhite"
