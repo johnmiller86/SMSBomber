@@ -80,6 +80,7 @@ public class BombActivity extends AppCompatActivity {
     public void sendText(View view){
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST_SEND_SMS);
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_PERMISSION && resultCode == RESULT_OK){
@@ -101,8 +102,7 @@ public class BombActivity extends AppCompatActivity {
 
             if (inputStream != null){
                 Bitmap photo = BitmapFactory.decodeStream(inputStream);
-                ImageView imageView = (ImageView) findViewById(R.id.imageView);
-                imageView.setImageBitmap(photo);
+                targetImageView.setImageBitmap(photo);
                 inputStream.close();
             }else{
                 targetImageView.setImageResource(R.mipmap.ic_launcher);
@@ -122,12 +122,12 @@ public class BombActivity extends AppCompatActivity {
         // Querying Contact ID
         Cursor cursor = getContentResolver().query(contact, new String[]{ContactsContract.Contacts._ID}, null, null, null);
 
-        if (cursor.moveToFirst()){
+        if (cursor != null && cursor.moveToFirst()){
             contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+            cursor.close();
         }
-        cursor.close();
 
-        // Retrieving Number(s)
+        // Retrieving Mobile Number
         cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                 new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER},
                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ? AND " +
@@ -136,14 +136,9 @@ public class BombActivity extends AppCompatActivity {
                 new String[]{contactId}, null);
 
         // Storing Contacts Number
-        if (cursor.moveToFirst()){
+        if (cursor != null && cursor.moveToFirst()){
             contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-        }
-        cursor.close();
-
-        // Contact Doesn't Contain Number
-        if (contactNumber == null){
-            Toast.makeText(this, "This contact does not have a number!", Toast.LENGTH_SHORT).show();
+            cursor.close();
         }
     }
 
@@ -154,25 +149,33 @@ public class BombActivity extends AppCompatActivity {
 
         Cursor cursor = getContentResolver().query(contact, null, null, null, null);
 
-        if (cursor.moveToFirst()){
+        if (cursor != null && cursor.moveToFirst()){
             targetNameTextView.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
+            cursor.close();
         }
-        cursor.close();
     }
 
     /**
      * Deploys messages.
      */
     private void sendBombs(){
-        if (contactNumber == null || contactNumber.equals("")){
+        // Contact not selected
+        if (contact == null || contact.toString().equals("")){
             Toast.makeText(this, "You must select a target!!", Toast.LENGTH_SHORT).show();
         }
+        // Contact selected has no number
+        else if (contactNumber == null || contactNumber.equals("")){
+            Toast.makeText(this, "Target has no associated mobile number!!", Toast.LENGTH_SHORT).show();
+        }
+        // Amount empty
         else if (quantityEditText.getText().toString().equals("")){
             Toast.makeText(this, "An amount was not specified!!", Toast.LENGTH_SHORT).show();
         }
+        // Message empty
         else if (messageEditText.getText().toString().equals("")){
             Toast.makeText(this, "A message was not specified!!", Toast.LENGTH_SHORT).show();
         }
+        // Send
         else{
             int bombs = Integer.parseInt(quantityEditText.getText().toString());
             try {
@@ -187,6 +190,9 @@ public class BombActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Opens the app's settings page in AppManager.
+     */
     private void goToSettings(){
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         Uri uri = Uri.fromParts("package", getPackageName(), null);
