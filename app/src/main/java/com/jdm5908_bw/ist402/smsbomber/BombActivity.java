@@ -14,7 +14,6 @@ import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.view.View;
@@ -68,23 +67,7 @@ public class BombActivity extends AppCompatActivity {
      * @param view the select button.
      */
     public void pickContact(View view){
-
-        // Marshmallow Runtime Permissions
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED){
-
-//            // Should we show an explanation?
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)){
-//
-//                // Show an expanation to the user *asynchronously* -- don't block
-//                // this thread waiting for the user's response! After the user
-//                // sees the explanation, try again to request the permission.
-//
-//                //TODO ASYNC EXPLANATION DIALOG
-//
-//            }else{
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, MY_PERMISSIONS_REQUEST_READ_CONTACTS); // Request Permissions
-//            }
-        }
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
     }
 
     /**
@@ -92,21 +75,7 @@ public class BombActivity extends AppCompatActivity {
      * @param view the send button.
      */
     public void sendText(View view){
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED){
-
-//            // Should we show an explanation?
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.SEND_SMS)){
-//
-//                // Show an expanation to the user *asynchronously* -- don't block
-//                // this thread waiting for the user's response! After the user
-//                // sees the explanation, try again to request the permission.
-//                //TODO ASYNC EXPLANATION DIALOG
-//
-//            }else{
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST_SEND_SMS); // Request Permissions
-//            }
-        }
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST_SEND_SMS);
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -234,7 +203,7 @@ public class BombActivity extends AppCompatActivity {
                 else{
                     selectTargetButton.setEnabled(false);
                     // TODO Show Dialog Explanation
-                    // TODO Re-request Permission
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
                 }
                 return;
             }
@@ -252,7 +221,7 @@ public class BombActivity extends AppCompatActivity {
                 else {
                     launchButton.setEnabled(false);
                     // TODO Show Dialog Explanation
-                    // TODO Re-request Permission
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST_SEND_SMS);
                 }
             }
         }
