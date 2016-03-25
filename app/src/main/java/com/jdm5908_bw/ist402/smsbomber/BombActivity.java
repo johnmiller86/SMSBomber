@@ -1,8 +1,10 @@
 package com.jdm5908_bw.ist402.smsbomber;
 
 // Imports
+
 import android.Manifest;
 import android.content.ContentUris;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -14,6 +16,7 @@ import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.view.View;
@@ -164,10 +167,10 @@ public class BombActivity extends AppCompatActivity {
         if (contactNumber == null || contactNumber.equals("")){
             Toast.makeText(this, "You must select a target!!", Toast.LENGTH_SHORT).show();
         }
-        else if (quantityEditText.getText().toString() == null || quantityEditText.getText().toString().equals("")){
+        else if (quantityEditText.getText().toString().equals("")){
             Toast.makeText(this, "An amount was not specified!!", Toast.LENGTH_SHORT).show();
         }
-        else if (messageEditText.getText().toString() == null || messageEditText.getText().toString().equals("")){
+        else if (messageEditText.getText().toString().equals("")){
             Toast.makeText(this, "A message was not specified!!", Toast.LENGTH_SHORT).show();
         }
         else{
@@ -200,14 +203,47 @@ public class BombActivity extends AppCompatActivity {
                 }
                 // Blocked
                 else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)){
-                    // TODO Show Dialog Explanation
-                    goToSettings();
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permission was blocked!")
+                            .setMessage("You have previously blocked this app from accessing contacts. This app will not function without this access. Would you like to go to settings and allow this permission?")
+
+                            // Open Settings button
+                            .setPositiveButton(R.string.settings, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    goToSettings();
+                                }
+                            })
+
+                            // Denied, close app
+                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    finish();
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
                 }
                 // Denied
                 else{
-                    selectTargetButton.setEnabled(false);
-                    // TODO Show Dialog Explanation
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permission was denied!")
+                            .setMessage("This app will not function without access to  contacts. Would you like to allow access?")
+
+                            // Open Settings button
+                            .setPositiveButton(R.string.allow, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ActivityCompat.requestPermissions(BombActivity.this, new String[]{Manifest.permission.READ_CONTACTS}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+                                }
+                            })
+
+                            // Denied, close app
+                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    finish();
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
                 }
                 return;
             }
@@ -218,14 +254,47 @@ public class BombActivity extends AppCompatActivity {
                 }
                 // Blocked
                 else if(!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.SEND_SMS)){
-                    // TODO Show Dialog Explanation
-                    goToSettings();
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permission was blocked!")
+                            .setMessage("You have previously blocked this app from sending SMS. This app will not function without this access. Would you like to go to settings and allow this permission?")
+
+                            // Open Settings button
+                            .setPositiveButton(R.string.settings, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    goToSettings();
+                                }
+                            })
+
+                            // Denied, close app
+                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    finish();
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
                 }
                 // Denied
                 else {
-                    launchButton.setEnabled(false);
-                    // TODO Show Dialog Explanation
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST_SEND_SMS);
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permission was denied!")
+                            .setMessage("This app will not function without access to sending SMS. Would you like to allow access?")
+
+                            // Open Settings button
+                            .setPositiveButton(R.string.allow, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ActivityCompat.requestPermissions(BombActivity.this, new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST_SEND_SMS);
+                                }
+                            })
+
+                            // Denied, close app
+                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    finish();
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
                 }
             }
         }

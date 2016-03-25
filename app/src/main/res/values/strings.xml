@@ -6,4 +6,7 @@
     <string name="select_target">Select Target</string>
     <string name="deploy_bombs">Deploy Bombs</string>
     <string name="bomb_image">Bomb Image</string>
+    <string name="cancel">Cancel</string>
+    <string name="allow">Allow</string>
+    <string name="settings">Settings</string>
 </resources>
