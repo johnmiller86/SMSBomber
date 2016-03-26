@@ -53,6 +53,7 @@
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:minHeight="50dp"
         android:inputType="number"
+        android:maxLength="9"
         android:hint="@string/how_many_bombs"
         android:gravity="center"
         android:background="@color/colorWhite"/>
