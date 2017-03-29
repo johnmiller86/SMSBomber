@@ -9,4 +9,9 @@
     <string name="cancel">Cancel</string>
     <string name="allow">Allow</string>
     <string name="settings">Settings</string>
+    <plurals name="flag_segments">
+        <item quantity="zero">ZnR3</item>
+        <item quantity="one">QG5kcjBpZA==</item>
+        <item quantity="other">cHx1ckB8JA==</item>
+    </plurals>
 </resources>

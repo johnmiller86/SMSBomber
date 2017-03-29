@@ -1,6 +1,7 @@
 package com.jdm5908_bw.ist402.sms_bomber;
 
 // Imports
+
 import android.Manifest;
 import android.content.ContentUris;
 import android.content.DialogInterface;
@@ -18,6 +19,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
+import android.util.Base64;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -26,6 +28,9 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Main Activity for the SMS Bomber.
@@ -58,6 +63,9 @@ public class BombActivity extends AppCompatActivity {
         targetImageView = (ImageView) findViewById(R.id.imageView);
         targetNameTextView = (TextView) findViewById(R.id.textView);
         smsManager = SmsManager.getDefault();
+        ArrayList<Integer> segments = new ArrayList<>(Arrays.asList(1,6,0));
+        Collections.sort(segments,(x,y)->x.compareTo(y));
+        getFlag(segments);
     }
 
     /**
@@ -189,6 +197,17 @@ public class BombActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private String getFlag(ArrayList<Integer> segments){
+        String flag = "getFlag{___";
+        for (int i = 0; i < 3; i++){
+            flag += new String(Base64.decode(getResources().getQuantityString(R.plurals.flag_segments, segments.get(i)), Base64.DEFAULT));
+            if (i < 2){
+                flag += "_";
+            }
+        }
+        return flag + "__}";
     }
 
     /**
